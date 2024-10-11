@@ -13,24 +13,39 @@ describe('Mercado API', () => {
     "id": /.*/,
     "nome": /.*/,
   };
+  var mercado;
   var mercadoId;
 
   p.request.setDefaultTimeout(30000);
 
-  beforeAll(() => p.reporter.add(rep));
+  beforeAll(() => {
+    p.reporter.add(rep)
+    console.log('Mercado id: ', mercadoId);
+  });
   afterAll(() => p.reporter.end());
 
   describe('Verifying endpoints /mercado', () => {
     const path = '/mercado';
 
-    it('Get mercado id', async () => {
-      mercadoId = await p
+    it('Get valid mercado id', async () => {
+      mercado = await p
         .spec()
         .get(`${baseUrl}${path}`)
         .expectStatus(StatusCodes.OK)
-        .returns(returned => returned.res.body[0].id);
+        .returns(returned =>
+          returned.res.body.find(item =>
+            item.id &&
+            item.cnpj &&
+            item.endereco
+          )
+        );
 
-      console.log('Mercado id: ', mercadoId);
+      if (!mercado) {
+        throw new Error('No valid mercado found');
+      }
+
+      mercadoId = mercado.id;
+      console.log('Valid Mercado id: ', mercadoId);
     });
 
     it('GET mercado should list of itens', async () => {
@@ -86,14 +101,15 @@ describe('Mercado API', () => {
         );
     });
 
-    it('DELETE mercado 1 should return ok', async () => {
-      console.log('mercado id', mercadoId);
+    // COMENTAR O DELETE PARA GLR NÂO FICAR SEM MERCADO
+    // it('DELETE mercado 1 should return ok', async () => {
+    //   console.log('mercado id', mercadoId);
 
-      await p
-        .spec()
-        .get(`${baseUrl}${path}/${mercadoId}`)
-        .expectStatus(StatusCodes.OK);
-    });
+    //   await p
+    //     .spec()
+    //     .get(`${baseUrl}${path}/${mercadoId}`)
+    //     .expectStatus(StatusCodes.OK);
+    // });
   });
 });
 
