@@ -45,7 +45,6 @@ describe('Mercado API', () => {
       }
 
       mercadoId = mercado.id;
-      console.log('Valid Mercado id: ', mercadoId);
     });
 
     it('GET mercado should list of itens', async () => {
@@ -74,8 +73,6 @@ describe('Mercado API', () => {
     const path = '/mercado';
 
     // it('GET mercado 1 should return ok', async () => {
-    //   console.log('mercado id', mercadoId);
-
     //   await p
     //     .spec()
     //     .get(`${baseUrl}${path}/${mercadoId}`)
@@ -86,8 +83,6 @@ describe('Mercado API', () => {
     // });
 
     it('PUT mercado 1 should return ok', async () => {
-      console.log('mercado id', mercadoId);
-
       await p
         .spec()
         .get(`${baseUrl}${path}/${mercadoId}`)
@@ -103,13 +98,52 @@ describe('Mercado API', () => {
 
     // COMENTAR O DELETE PARA GLR NÂO FICAR SEM MERCADO
     // it('DELETE mercado 1 should return ok', async () => {
-    //   console.log('mercado id', mercadoId);
-
     //   await p
     //     .spec()
     //     .get(`${baseUrl}${path}/${mercadoId}`)
     //     .expectStatus(StatusCodes.OK);
     // });
+  });
+
+  describe('Verifying endpoints /mercado/{mercadoId}/produtos', () => {
+    const path = '/mercado';
+    var mercadoProdutos;
+    var mercadoProdutosId;
+
+    it('Get valid mercado id', async () => {
+      mercadoProdutos = await p
+        .spec()
+        .get(`${baseUrl}${path}`)
+        .expectStatus(StatusCodes.OK)
+        .returns(returned =>
+          returned.res.body.find(item =>
+            item.id &&
+            item.cnpj &&
+            item.endereco &&
+            item.produtos
+          )
+        );
+
+      if (!mercadoProdutos) {
+        throw new Error('No valid mercado found');
+      }
+
+      mercadoProdutosId = mercadoProdutos.id;
+    });
+
+    it('GET mercado produtos should return list of produtos', async () => {
+      await p
+        .spec()
+        .get(`${baseUrl}${path}/${mercadoProdutosId}/produtos`)
+        .expectStatus(StatusCodes.OK)
+        .expectJsonLike({
+          "cnpj": /.*/,
+          "endereco": /.*/,
+          "id": /.*/,
+          "nome": /.*/,
+          "produtos": /.*/
+        });
+    });
   });
 });
 
